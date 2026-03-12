@@ -1,12 +1,12 @@
 from Loader import load_one_file, load_all_files
 import numpy as np
-from scipy.spatial import kdtree
+from scipy.spatial import KDTree
 
 def calc_features(data):
     features = []
     for data_point in data:
 
-        KDT = kdtree.KDTree(data_point)
+        KDT = KDTree(data_point)
 
         feature_vector = [
             feature_1(data_point, KDT),
@@ -55,4 +55,7 @@ def feature_5(data, KDT):
 def feature_6(data, KDT):
     return False
 
-
+if __name__ == '__main__':
+    features = calc_features(load_all_files())
+    features = standardize(features)
+    print(features)
