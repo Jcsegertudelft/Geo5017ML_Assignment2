@@ -33,6 +33,7 @@ def plot_feature(data, feature_func):
     plt.scatter(feature_vals[200:300],np.full(100, 3),c='green', alpha=0.5)
     plt.scatter(feature_vals[300:400],np.full(100, 4),c='blue', alpha=0.5)
     plt.scatter(feature_vals[400:],np.full(100, 5),c='yellow', alpha=0.5)
+    plt.xlim([-5,5])
     plt.show()
 
 
