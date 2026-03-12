@@ -6,7 +6,7 @@ import numpy as np
 from Loader import load_one_file, load_all_files
 from Features import *
 
-class object:
+class pc_object:
     def __init__(self, number):
         self.number = number
 
