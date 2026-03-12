@@ -46,23 +46,23 @@ def standardize(features):
 # Ideas features : Mean planarity of neighbourhood of 20~ points
 # mean Z-length / XY-length of normal vector (fences have no little normal facing up)
 # some size stuff
-def feature_1(data, KDT = None):
+def feature_1(data):
     #Temporary test function
     return len(data)
 
-def feature_2(data, KDT):
+def feature_2(data):
     return False
 
-def feature_3(data, KDT):
+def feature_3(data):
     return False
 
-def feature_4(data, KDT):
+def feature_4(data):
     return False
 
-def feature_5(data, KDT):
+def feature_5(data):
     return False
 
-def feature_6(data, KDT):
+def feature_6(data):
     return False
 
 if __name__ == '__main__':
