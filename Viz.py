@@ -4,6 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 def plot_pc(data, classes = None):
+    "Plots a point cloud, with or without labels"
     plt.figure(figsize=(10, 10))
     ax = plt.axes(projection='3d')
     if classes.any() != None:
@@ -24,13 +25,14 @@ def plot_pc(data, classes = None):
     return
 
 def plot_feature(data, feature_func):
+    "Plot the distribution of features per class"
     feature_vals = standardize(np.array([feature_1(data_point) for data_point in data]))
     plt.figure(figsize=(10, 10))
-    plt.scatter(feature_vals[:100], np.full(100,1), c='black')
-    plt.scatter(feature_vals[100:200],np.full(100, 2),c='red')
-    plt.scatter(feature_vals[200:300],np.full(100, 3),c='green')
-    plt.scatter(feature_vals[300:400],np.full(100, 4),c='blue')
-    plt.scatter(feature_vals[400:],np.full(100, 5),c='yellow')
+    plt.scatter(feature_vals[:100], np.full(100,1), c='black', alpha=0.5)
+    plt.scatter(feature_vals[100:200],np.full(100, 2),c='red', alpha=0.5)
+    plt.scatter(feature_vals[200:300],np.full(100, 3),c='green', alpha=0.5)
+    plt.scatter(feature_vals[300:400],np.full(100, 4),c='blue', alpha=0.5)
+    plt.scatter(feature_vals[400:],np.full(100, 5),c='yellow', alpha=0.5)
     plt.show()
 
 

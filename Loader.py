@@ -1,12 +1,16 @@
 '''
-File with functions that load the pointcloud data
+File with functions that load the point cloud data
 '''
 
 import numpy as np
 from os import listdir
 
 def load_one_file(number):
+    """
+    Loads a single point cloud file
+    """
     number = str(number)
+    # Need file names of format 'xxx.xyz'
     while len(number) <3:
         number = '0' + number
     file_path = "Data/Data/" + number + ".xyz"
@@ -14,6 +18,9 @@ def load_one_file(number):
     return data
 
 def load_all_files():
+    """
+    Loads point cloud files and puts them in a list
+    """
     all_data = []
     for file in listdir("Data/Data"):
         file_path = "Data/Data/" + file

@@ -3,11 +3,18 @@ import numpy as np
 from scipy.spatial import KDTree
 
 def calc_features(data):
+    """
+    Main fucntion of this file
+    calculating the features for each point cloud by which they are to be classified
+
+    Returns an nxm array of these features values, n number of point clouds, m number of features
+    """
     features = []
     for data_point in data:
-
+        #KDTree per pointcloud
         KDT = KDTree(data_point)
 
+        #Calculate Feature vector for each pointcloud
         feature_vector = [
             feature_1(data_point, KDT),
             feature_2(data_point, KDT),
@@ -22,6 +29,9 @@ def calc_features(data):
     return features
 
 def standardize(features):
+    """
+    Standardizing the features which are calculate above
+    """
     if features.ndim == 1:
         mean = np.mean(features)
         std = np.std(features)
@@ -37,7 +47,7 @@ def standardize(features):
 # mean Z-length / XY-length of normal vector (fences have no little normal facing up)
 # some size stuff
 def feature_1(data, KDT = None):
-
+    #Temporary test function
     return len(data)
 
 def feature_2(data, KDT):
