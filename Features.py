@@ -1,6 +1,6 @@
 from Loader import load_one_file, load_all_files
 import numpy as np
-from scipy.spatial import KDTree
+from scipy.spatial import KDTree, ConvexHull
 
 def calc_features(data):
     """
@@ -41,17 +41,31 @@ def standardize(features):
     features = (features - mean) / std
     return features
 
-# TODO: Implement features: give suiting name, return value
-
-# Ideas features : Mean planarity of neighbourhood of 20~ points
-# mean Z-length / XY-length of normal vector (fences have no little normal facing up)
-# some size stuff
+# TODO: Implement features, return value
+# Narrowness: variance in Z (or height zmax - zmin) over Variance X and Y
+# More size related
 def feature_1(data):
-    #Temporary test function
-    return len(data)
+    '''
+    2D point density: Number of points divided by area of 2D convex hull
+    '''
+    Convex_2d = ConvexHull(data[:,:2])
+    return data.shape[0] / Convex_2d.volume
+
 
 def feature_2(data):
-    return False
+    '''
+    Mean Planarity: Planarity of neighbourhood of 10 closest + point itself
+    '''
+    KDT = KDTree(data)
+    plan_list = []
+    for point in data:
+        subset_dists, subset_inds = KDT.query(point,11)
+        subset_pts = data[subset_inds]
+        eigvals = calc_eigvals(subset_pts)
+        eigvals.sort()
+        planarity = (eigvals[1]-eigvals[0])/eigvals[2]
+        plan_list.append(planarity)
+    return np.mean(plan_list)
 
 def feature_3(data):
     return False
@@ -65,7 +79,12 @@ def feature_5(data):
 def feature_6(data):
     return False
 
+def calc_eigvals(data):
+    cov_matr = np.cov(data.T)
+    eig_vals = np.linalg.eigvals(cov_matr)
+    return eig_vals
+
 if __name__ == '__main__':
-    features = calc_features(load_all_files())
-    features = standardize(features)
-    print(features)
+    data = load_one_file(4)
+    calc_eigvals(data)
+    feature_1(data)

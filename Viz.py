@@ -26,17 +26,37 @@ def plot_pc(data, classes = None):
 
 def plot_feature(data, feature_func):
     "Plot the distribution of features per class"
-    feature_vals = standardize(np.array([feature_1(data_point) for data_point in data]))
+    feature_vals = standardize(np.array([feature_func(data_point) for data_point in data]))
     plt.figure(figsize=(10, 10))
     plt.scatter(feature_vals[:100], np.full(100,1), c='black', alpha=0.5)
     plt.scatter(feature_vals[100:200],np.full(100, 2),c='red', alpha=0.5)
     plt.scatter(feature_vals[200:300],np.full(100, 3),c='green', alpha=0.5)
     plt.scatter(feature_vals[300:400],np.full(100, 4),c='blue', alpha=0.5)
     plt.scatter(feature_vals[400:],np.full(100, 5),c='yellow', alpha=0.5)
+    for i in range(-5,5):
+        plt.axvline(x=i, color='black',zorder = 0, alpha =0.4)
     plt.xlim([-5,5])
+    plt.show()
+
+def plot_2_features(data, feature_func_1, feature_func_2):
+    "Plot the distribution of features per class"
+    feature_vals1 = standardize(np.array([feature_func_1(data_point) for data_point in data]))
+    feature_vals2 = standardize(np.array([feature_func_2(data_point) for data_point in data]))
+    plt.figure(figsize=(10, 10))
+    plt.scatter(feature_vals1[0:100], feature_vals2[0:100], c='black', alpha=0.5)
+    plt.scatter(feature_vals1[100:200], feature_vals2[100:200], c='red', alpha=0.5)
+    plt.scatter(feature_vals1[200:300], feature_vals2[200:300], c='green', alpha=0.5)
+    plt.scatter(feature_vals1[300:400], feature_vals2[300:400], c='blue', alpha=0.5)
+    plt.scatter(feature_vals1[400:500], feature_vals2[400:500], c='yellow', alpha=0.5)
+    plt.grid()
+    plt.xlim([-5,5])
+    plt.ylim([-5,5])
+    plt.xlabel('Feature 1')
+    plt.ylabel('Feature 2')
     plt.show()
 
 
 if __name__ == '__main__':
     data = load_all_files()
-    plot_feature(data, feature_1)
+    #plot_feature(data, feature_1)
+    plot_2_features(data,feature_1, feature_2)
