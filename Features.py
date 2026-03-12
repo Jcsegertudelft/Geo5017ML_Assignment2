@@ -2,7 +2,7 @@ from Loader import load_one_file, load_all_files
 import numpy as np
 from scipy.spatial import kdtree
 
-def main(data):
+def calc_features(data):
     features = []
     for data_point in data:
 
@@ -18,9 +18,27 @@ def main(data):
         ]
         features.append(feature_vector)
 
+    features = np.array(features)
+    return features
+
+def standardize(features):
+    if features.ndim == 1:
+        mean = np.mean(features)
+        std = np.std(features)
+    else:
+        mean = np.mean(features, axis=0)
+        std = np.std(features, axis=0)
+    features = (features - mean) / std
+    return features
+
 # TODO: Implement features: give suiting name, return value
-def feature_1(data, KDT):
-    return False
+
+# Ideas features : Mean planarity of neighbourhood of 20~ points
+# mean Z-length / XY-length of normal vector (fences have no little normal facing up)
+# some size stuff
+def feature_1(data, KDT = None):
+
+    return len(data)
 
 def feature_2(data, KDT):
     return False
