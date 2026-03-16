@@ -37,10 +37,11 @@ def standardize(features):
         mean = np.mean(features)
         std = np.std(features)
     else:
-        mean = np.mean(features, axis=0)
-        std = np.std(features, axis=0)
-    features = (features - mean) / std
-    return list(features)
+        mean = np.mean(features, axis=1)
+        std = np.std(features, axis=1)
+
+    features = (features.T - mean) /std
+    return features.T
 
 # TODO: Implement features, return value
 # Narrowness: variance in Z (or height zmax - zmin) over Variance X and Y
@@ -99,10 +100,10 @@ def feature_4(data):
 
 
 def feature_5(data):
-    return False
+    return np.random.randint(10)
 
 def feature_6(data):
-    return False
+    return np.random.randint(10)
 
 def calc_eigvals(data):
     cov_matr = np.cov(data.T)
