@@ -100,10 +100,24 @@ def feature_4(data):
 
 
 def feature_5(data):
-    return np.random.randint(10)
+    """
+    3D point density: number of points / 3D convex hull volume. Example: A building has large volume of points
+    Trees have irregular but large distribution/volume
+    """
+    hull=ConvexHull(data)
+    return data.shape[0]/hull.volume
 
 def feature_6(data):
-    return np.random.randint(10)
+    """
+    Bounding box aspect ratio: height / max horizontal width
+    Measures how tall vs wide an object is. Good seperation of poles
+    """
+    x_range = np.max(data[:,0]) - np.min(data[:,0])
+    y_range = np.max(data[:,1]) - np.min(data[:,1])
+    z_range = np.max(data[:,2]) - np.min(data[:,2])
+
+    width = max(x_range, y_range)
+    return z_range / width if width > 0 else 0
 
 def calc_eigvals(data):
     cov_matr = np.cov(data.T)
