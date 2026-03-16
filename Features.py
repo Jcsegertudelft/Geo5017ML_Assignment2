@@ -32,6 +32,7 @@ def standardize(features):
     """
     Standardizing the features which are calculate above
     """
+    features = np.array(features)
     if features.ndim == 1:
         mean = np.mean(features)
         std = np.std(features)
@@ -39,7 +40,7 @@ def standardize(features):
         mean = np.mean(features, axis=0)
         std = np.std(features, axis=0)
     features = (features - mean) / std
-    return features
+    return list(features)
 
 # TODO: Implement features, return value
 # Narrowness: variance in Z (or height zmax - zmin) over Variance X and Y
