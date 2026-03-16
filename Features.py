@@ -88,12 +88,14 @@ def feature_3(data):
 
 def feature_4(data):
     """
-    Height above ground: current point - estimated ground height using 5th percentile.
+    Height above ground: highest point - estimated ground height using 5th percentile.
     Distinguishes tall objects like trees from low objects like cars.
     """
     height = data[:,2]
-    perc_5_point = np.percentile(data[height],5)
-    return height-perc_5_point
+    max_height = np.max(height)
+    ground_height = np.percentile(height,5)
+    height_above_ground = max_height - ground_height
+    return height_above_ground
 
 
 def feature_5(data):
