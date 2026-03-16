@@ -51,12 +51,12 @@ def plot_2_features(data, feature_func_1, feature_func_2):
     plt.grid()
     plt.xlim([-5,5])
     plt.ylim([-5,5])
-    plt.xlabel('Feature 1')
-    plt.ylabel('Feature 2')
+    plt.xlabel('Feature 3')
+    plt.ylabel('Feature 4')
     plt.show()
 
 
 if __name__ == '__main__':
     data = load_all_files()
     #plot_feature(data, feature_1)
-    plot_2_features(data,feature_1, feature_2)
+    plot_2_features(data,feature_3, feature_4)

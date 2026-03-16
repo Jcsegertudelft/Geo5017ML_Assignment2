@@ -68,11 +68,35 @@ def feature_2(data):
         plan_list.append(planarity)
     return np.mean(plan_list)
 
+
 def feature_3(data):
-    return False
+    """
+    Mean linearity: Linearity of neighbourhood of 10 closest + point itself
+    Distinguishes poles from other tall objects like buildings.
+    """
+    KDT = KDTree(data)
+    linearity_list = []
+    for point in data:
+        subset_dists, subset_inds = KDT.query(point,11)
+        subset_pts = data[subset_inds]
+        eigvals = calc_eigvals(subset_pts)
+        eigvals.sort()
+        linearity = (eigvals[2]-eigvals[1])/eigvals[2]
+        linearity_list.append(linearity)
+    return np.mean(linearity_list)
+
 
 def feature_4(data):
-    return False
+    """
+    Height above ground: highest point - estimated ground height using 5th percentile.
+    Distinguishes tall objects like trees from low objects like cars.
+    """
+    height = data[:,2]
+    max_height = np.max(height)
+    ground_height = np.percentile(height,5)
+    height_above_ground = max_height - ground_height
+    return height_above_ground
+
 
 def feature_5(data):
     return False
