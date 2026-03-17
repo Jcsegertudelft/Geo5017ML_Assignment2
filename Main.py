@@ -29,8 +29,20 @@ class pc_object:
         self.feature.append(feature_6(self.points))
 
 
-def forward_search(training_set, n_wanted):
-    pass
+def forward_search(training_set_df,n_considered, n_wanted):
+    selected_features = []
+    candidate_features = list(range(1,n_considered+1))
+    while len(selected_features) < n_wanted:
+        selection_value = []
+        for feature in candidate_features:
+            feature_set = tuple(selected_features + [feature])
+            within = within_scatter(training_set_df, feature_set)
+            between = between_scatter(training_set_df, feature_set)
+            J = np.linalg.trace(between) / np.linalg.trace(within)
+            selection_value.append(J)
+        selected_feature = candidate_features.pop(np.argmax(selection_value))
+        selected_features.append(selected_feature)
+    return selected_features
 
 def create_feature_df(pc_objects):
     df = pd.DataFrame()
@@ -41,7 +53,6 @@ def create_feature_df(pc_objects):
     for i in range(all_features.shape[0]):
         df[f'feature_{i+1}'] = all_features[i]
     return df
-
 
 def within_scatter(df, feature_numbers:Tuple):
     feat_column_names = [f'feature_{i}' for i in feature_numbers]
@@ -80,6 +91,8 @@ def main():
     train_set_df = create_feature_df(train_set)
     test_set_df = create_feature_df(test_set)
 
+    selected_features = forward_search(train_set_df, 6, 4)
+    print(selected_features)
 
 
 

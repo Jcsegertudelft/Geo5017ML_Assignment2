@@ -16,12 +16,12 @@ def calc_features(data):
 
         #Calculate Feature vector for each pointcloud
         feature_vector = [
-            feature_1(data_point, KDT),
-            feature_2(data_point, KDT),
-            feature_3(data_point, KDT),
-            feature_4(data_point, KDT),
-            feature_5(data_point, KDT),
-            feature_6(data_point, KDT)
+            feature_1(data_point),
+            feature_2(data_point),
+            feature_3(data_point),
+            feature_4(data_point),
+            feature_5(data_point),
+            feature_6(data_point)
         ]
         features.append(feature_vector)
 
