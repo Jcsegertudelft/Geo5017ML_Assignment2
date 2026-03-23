@@ -79,7 +79,7 @@ def learning_curve(model):
 
     for training_fraction in training_fractions:
         print(f"Training fraction: {training_fraction}")
-        accuracy,_ = model(training_fraction)
+        accuracy,_,_ = model(training_fraction)
         accuracies.append(accuracy)
 
     # Make plot
