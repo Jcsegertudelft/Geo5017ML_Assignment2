@@ -76,7 +76,7 @@ def hyperparameter():
 
     # RBF
     for C in [1,10]:
-        for gamma in ['scale','auto',0.1]:
+        for gamma in ['scale',0.1]:
             accuracy,_,_= svm_classifier(fraction_train=0.6,seed=42, kernel='rbf', C=C, gamma=gamma)
             results.append(('rbf', C, gamma, None, accuracy))
 
