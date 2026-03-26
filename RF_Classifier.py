@@ -33,9 +33,10 @@ def random_forest(fraction_train=0.7, seed=42):
     test_data = pd.DataFrame(test_data, columns=column_names)
     train_data = pd.DataFrame(train_data, columns=column_names)
 
-
-    x_train = np.array(train_data[['feature_2', 'feature_3', 'feature_4', 'feature_5']])
-    x_test = np.array(test_data[['feature_2', 'feature_3', 'feature_4', 'feature_5']])
+    feature_cols = [col for col in train_data.columns if 'feature' in col]
+    feature_cols.sort()
+    x_train = np.array(train_data[feature_cols])
+    x_test = np.array(test_data[feature_cols])
 
     y_train = np.array(train_data['class'])
     y_test = np.array(test_data['class'])
