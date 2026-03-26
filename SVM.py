@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import pandas as pd
 import random
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
@@ -10,40 +11,27 @@ from Loader import load_one_file
 from Features import feature_2, feature_3, feature_4, feature_5
 
 def svm_classifier(fraction_train, seed=42, kernel='rbf', C=1.0, gamma='scale', degree=3):
-    """Creates SVM classifier, trains it and evaluates it on the test set"""
-    # Generate numbers used for training and testing
-    upper = 500  # Number of point cloud files
+    """Creates random forest classifier, trains it and evaluates it on the test set"""
+    train_data = pd.read_csv('train_set.csv')
+    test_data = pd.read_csv('test_set.csv')
+
+    total_data = pd.concat([train_data, test_data], ignore_index=True)
+    column_names = total_data.columns
     random.seed(seed)
-    train_numbers = list(random.sample(range(0, upper), int(upper * fraction_train)))
-    test_numbers = [number for number in range(0, upper) if number not in train_numbers]
+    selection = random.sample(range(500), int(np.round((1 - fraction_train) * 500)))  # Random selection of test set
+    test_set_ind = selection
 
-    # Create objects for training set
-    # Initialize empty arrays
-    x_train = np.zeros((len(train_numbers), 4))
-    y_train = np.zeros(len(train_numbers), dtype=int)
-    # Iterate over the specified files to get the data
-    for index, number in enumerate(train_numbers):
-        data = load_one_file(number)
-        # Use the selected features
-        features = [feature_2(data), feature_3(data), feature_4(data), feature_5(data)]
-        x_train[index] = features
-        # Get the ground truth label
-        y_train[index] = number // 100
+    total_data = np.array(total_data)
+    test_data = total_data[test_set_ind]
+    train_data = np.delete(total_data, test_set_ind, axis=0)
+    test_data = pd.DataFrame(test_data, columns=column_names)
+    train_data = pd.DataFrame(train_data, columns=column_names)
 
-    # Create objects for test set
-    x_test = np.zeros((len(test_numbers), 4))
-    y_test = np.zeros(len(test_numbers), dtype=int)
-    for index, number in enumerate(test_numbers):
-        data = load_one_file(number)
-        # Use the selected features
-        features = [feature_2(data), feature_3(data), feature_4(data), feature_5(data)]
-        x_test[index] = features
-        y_test[index] = number // 100
+    x_train = np.array(train_data[['feature_2', 'feature_3', 'feature_4', 'feature_5']])
+    x_test = np.array(test_data[['feature_2', 'feature_3', 'feature_4', 'feature_5']])
 
-    # Feature scaling
-    scaler = StandardScaler()
-    x_train = scaler.fit_transform(x_train)
-    x_test = scaler.transform(x_test)
+    y_train = np.array(train_data['class'])
+    y_test = np.array(test_data['class'])
 
     # Initializing SVM here
     classifier = SVC(
@@ -80,18 +68,18 @@ def hyperparameter():
             accuracy,_,_= svm_classifier(fraction_train=0.6,seed=42, kernel='rbf', C=C, gamma=gamma)
             results.append(('rbf', C, gamma, None, accuracy))
 
-    # # Polynomial
-    # for C in [0.1,1,10]:
-    #     for gamma in ['scale','auto',0.01,0.1]:
-    #         for degree in [2,3,4]:
-    #             accuracy,_,_= svm_classifier(fraction_train=0.6,seed=42, kernel='poly', C=C, gamma=gamma,degree=degree)
-    #             results.append(('poly', C, gamma, degree, accuracy))
-    #
-    # # sigmoid
-    # for C in [0.1, 1, 10]:
-    #     for gamma in ['scale', 'auto', 0.01, 0.1]:
-    #         accuracy,_,_= svm_classifier(fraction_train=0.6,seed=42, kernel='sigmoid', C=C, gamma=gamma)
-    #         results.append(('sigmoid', C, gamma, None, accuracy))
+    # Polynomial
+    for C in [0.1,1,10]:
+        for gamma in ['scale','auto',0.01,0.1]:
+            for degree in [2,3,4]:
+                accuracy,_,_= svm_classifier(fraction_train=0.6,seed=42, kernel='poly', C=C, gamma=gamma,degree=degree)
+                results.append(('poly', C, gamma, degree, accuracy))
+
+    # sigmoid
+    for C in [0.1, 1, 10]:
+        for gamma in ['scale', 'auto', 0.01, 0.1]:
+            accuracy,_,_= svm_classifier(fraction_train=0.6,seed=42, kernel='sigmoid', C=C, gamma=gamma)
+            results.append(('sigmoid', C, gamma, None, accuracy))
 
     results.sort(key=lambda x: x[4], reverse=True)
 

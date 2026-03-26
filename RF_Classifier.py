@@ -16,24 +16,22 @@ from Features import feature_2, feature_3, feature_4, feature_5
 # Specify the fraction of data to be used for training
 fraction_train = 0.5
 
-def random_forest(fraction_train=0.7, seed=42, learn_curve = False):
+def random_forest(fraction_train=0.7, seed=42):
     """Creates random forest classifier, trains it and evaluates it on the test set"""
-
     train_data = pd.read_csv('train_set.csv')
     test_data = pd.read_csv('test_set.csv')
 
-    if learn_curve:
-        total_data = pd.concat([train_data, test_data], ignore_index=True)
-        column_names = total_data.columns
-        random.seed(seed)
-        selection = random.sample(range(500),int(np.round((1-fraction_train)*500)))  # Random selection of test set
-        test_set_ind = selection
+    total_data = pd.concat([train_data, test_data], ignore_index=True)
+    column_names = total_data.columns
+    random.seed(seed)
+    selection = random.sample(range(500),int(np.round((1-fraction_train)*500)))  # Random selection of test set
+    test_set_ind = selection
 
-        total_data = np.array(total_data)
-        test_data = total_data[test_set_ind]
-        train_data = np.delete(total_data, test_set_ind, axis=0)
-        test_data = pd.DataFrame(test_data, columns=column_names)
-        train_data = pd.DataFrame(train_data, columns=column_names)
+    total_data = np.array(total_data)
+    test_data = total_data[test_set_ind]
+    train_data = np.delete(total_data, test_set_ind, axis=0)
+    test_data = pd.DataFrame(test_data, columns=column_names)
+    train_data = pd.DataFrame(train_data, columns=column_names)
 
 
     x_train = np.array(train_data[['feature_2', 'feature_3', 'feature_4', 'feature_5']])
@@ -73,7 +71,7 @@ def learning_curve(model):
         print(f"Training fraction: {training_fraction}")
         accuracies = []
         for seed in seeds:
-            accuracy,_,_ = model(training_fraction, seed, learn_curve=True)
+            accuracy,_,_ = model(training_fraction, seed)
             accuracies.append(accuracy)
         avg_accuracy = np.mean(accuracies)
         avg_accuracies.append(avg_accuracy)
@@ -91,24 +89,23 @@ def learning_curve(model):
     plt.show()
 
 
-"""# Run model
-accuracy,predictions,y_test = random_forest(0.5)
 
-# Make confusion matrix and make heatmap
-labels = ["building", "car", "fence", "pole", "tree"]
-cm = confusion_matrix(y_test,predictions,normalize='true')
-sns.heatmap(cm,
-            annot=True,
-            fmt='.2%',
-            cmap='Blues',
-            xticklabels=labels,
-            yticklabels=labels)
-plt.xlabel("Predicted")
-plt.ylabel("True")
-plt.title("Confusion Matrix")
-plt.show()"""
 
 # Make learning curve
 if __name__ == "__main__":
-    accuracy, predictions, y_test = random_forest(0.7)
+    accuracy, predictions, y_test = random_forest(0.8)
     learning_curve(random_forest)
+
+    labels = ["building", "car", "fence", "pole", "tree"]
+    cm = confusion_matrix(y_test, predictions, normalize='true')
+    sns.heatmap(cm,
+                annot=True,
+                fmt='.2%',
+                cmap='Blues',
+                xticklabels=labels,
+                yticklabels=labels)
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.title("Confusion Matrix")
+    plt.savefig('confusion_matrix_rf.png', bbox_inches='tight', dpi=300)
+    plt.show()
