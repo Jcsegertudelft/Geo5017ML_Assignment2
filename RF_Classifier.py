@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import pandas as pd
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
@@ -15,42 +16,32 @@ from Features import feature_2, feature_3, feature_4, feature_5
 # Specify the fraction of data to be used for training
 fraction_train = 0.5
 
-
-def random_forest(fraction_train, seed=42):
+def random_forest(fraction_train=0.7, seed=42, learn_curve = False):
     """Creates random forest classifier, trains it and evaluates it on the test set"""
-    # Generate numbers used for training and testing
-    upper = 500       # Number of point cloud files
-    random.seed(seed)
-    train_numbers = list(random.sample(range(0,upper),int(upper*fraction_train)))
-    test_numbers = [number for number in range(0,upper) if number not in train_numbers]
 
-    # Create objects for training set
-    # Initialize empty arrays
-    x_train = np.zeros((len(train_numbers),4))
-    y_train = np.zeros(len(train_numbers),dtype=int)
-    # Iterate over the specified files to get the data
-    for index, number in enumerate(train_numbers):
-        data = load_one_file(number)
-        # Use the selected features
-        features = [feature_2(data), feature_3(data), feature_4(data), feature_5(data)]
-        x_train[index] = features
-        # Get the ground truth label
-        y_train[index] = number//100
+    train_data = pd.read_csv('train_set.csv')
+    test_data = pd.read_csv('test_set.csv')
 
-    # Create objects for test set
-    x_test = np.zeros((len(test_numbers),4))
-    y_test = np.zeros(len(test_numbers),dtype=int)
-    for index, number in enumerate(test_numbers):
-        data = load_one_file(number)
-        # Use the selected features
-        features = [feature_2(data), feature_3(data), feature_4(data), feature_5(data)]
-        x_test[index] = features
-        y_test[index] = number//100
+    if learn_curve:
+        total_data = pd.concat([train_data, test_data], ignore_index=True)
+        column_names = total_data.columns
+        random.seed(seed)
+        selection = random.sample(range(500),int(np.round((1-fraction_train)*500)))  # Random selection of test set
+        test_set_ind = selection
 
-    # Feature scaling
-    scaler = StandardScaler()
-    x_train = scaler.fit_transform(x_train)
-    x_test = scaler.transform(x_test)
+        total_data = np.array(total_data)
+        test_data = total_data[test_set_ind]
+        train_data = np.delete(total_data, test_set_ind, axis=0)
+        test_data = pd.DataFrame(test_data, columns=column_names)
+        train_data = pd.DataFrame(train_data, columns=column_names)
+
+
+    x_train = np.array(train_data[['feature_2', 'feature_3', 'feature_4', 'feature_5']])
+    x_test = np.array(test_data[['feature_2', 'feature_3', 'feature_4', 'feature_5']])
+
+    y_train = np.array(train_data['class'])
+    y_test = np.array(test_data['class'])
+
 
     # Initialize and fit the classifier with the hyperparameters
     classifier = RandomForestClassifier(n_estimators=200,           # Number of trees in the forest                                     (start with 100, 200 best)
@@ -60,7 +51,8 @@ def random_forest(fraction_train, seed=42):
                                         min_samples_leaf=1,         # Minimum samples required to be at a leaf node.                    (start with 1 then 2 and 5)
                                         max_features='sqrt',        # Number of features considered for splitting at each node ('sqrt', log2 or None) (start with sqrt)
                                         bootstrap = True,           # Bootstraps enabled
-                                        n_jobs=-1)                  # Number of jobs to run in parallel
+                                        n_jobs=-1,                  # Number of jobs in parallel
+                                        random_state=seed)          # RNG Seed
 
     classifier.fit(x_train, y_train)
 
@@ -81,7 +73,7 @@ def learning_curve(model):
         print(f"Training fraction: {training_fraction}")
         accuracies = []
         for seed in seeds:
-            accuracy,_,_ = model(training_fraction, seed)
+            accuracy,_,_ = model(training_fraction, seed, learn_curve=True)
             accuracies.append(accuracy)
         avg_accuracy = np.mean(accuracies)
         avg_accuracies.append(avg_accuracy)
@@ -95,6 +87,7 @@ def learning_curve(model):
     plt.ylabel('Accuracy')
     plt.legend()
     plt.grid(True)
+    plt.savefig('learning_curve.png', bbox_inches='tight', dpi=300)
     plt.show()
 
 
@@ -116,4 +109,6 @@ plt.title("Confusion Matrix")
 plt.show()"""
 
 # Make learning curve
-learning_curve(random_forest)
+if __name__ == "__main__":
+    accuracy, predictions, y_test = random_forest(0.7)
+    learning_curve(random_forest)

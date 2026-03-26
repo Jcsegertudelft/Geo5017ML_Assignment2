@@ -77,10 +77,13 @@ def between_scatter(df, feature_numbers:Tuple):
 
 
 def main():
+    print('Reading data')
     pc_objects = np.array([pc_object(i) for i in range(500)])
     rng = np.random.default_rng(42) #Set the rng consistently
+    print('Computing features')
     for obj in pc_objects:
         obj.compute_features()
+    print('Selecting Training/Test split')
     selection = rng.choice(np.arange(100),size = 30, replace = False) #Random selection of test set
     test_set_ind = []
     for i in range(5):
@@ -88,11 +91,16 @@ def main():
     test_set_ind = np.array(test_set_ind)
     test_set = pc_objects[test_set_ind]
     train_set = np.delete(pc_objects,test_set_ind)
+    print('Put features in Dataframe')
     train_set_df = create_feature_df(train_set)
     test_set_df = create_feature_df(test_set)
-
+    print('Selecting features based on forward search')
     selected_features = forward_search(train_set_df, 6, 4)
     print(selected_features)
+    columns_exported = ['number', 'class'] + [f'feature_{i}' for i in selected_features]
+    print(train_set_df)
+    train_set_df.to_csv('train_set.csv', index = False, columns = columns_exported)
+    test_set_df.to_csv('test_set.csv', index = False, columns = columns_exported)
 
 
 
