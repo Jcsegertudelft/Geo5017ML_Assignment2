@@ -7,7 +7,11 @@ Afterwards SVM.py and RF_Classifier.py can be ran in any order. These will produ
 
 # Needed packages
 numpy: for calculations
+
 pandas: for DataFrames
+
 matplotlib: for plots
+
 seaborn: used in creation confusion matrix plot
+
 sklearn: for the classifiers and confusion matrix
