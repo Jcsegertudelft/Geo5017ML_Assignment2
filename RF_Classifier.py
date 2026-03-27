@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
@@ -90,13 +89,7 @@ def learning_curve(model):
     plt.show()
 
 
-
-
-# Make learning curve
-if __name__ == "__main__":
-    accuracy, predictions, y_test = random_forest(0.8)
-    learning_curve(random_forest)
-
+def create_cm(y_test, predictions):
     labels = ["building", "car", "fence", "pole", "tree"]
     cm = confusion_matrix(y_test, predictions, normalize='true')
     sns.heatmap(cm,
@@ -110,3 +103,11 @@ if __name__ == "__main__":
     plt.title("Confusion Matrix")
     plt.savefig('confusion_matrix_rf.png', bbox_inches='tight', dpi=300)
     plt.show()
+
+
+if __name__ == "__main__":
+    accuracy, predictions, y_test = random_forest(0.7)
+    # Confusion Matrix
+    create_cm(y_test, predictions)
+    # Learning Curve
+    learning_curve(random_forest)

@@ -116,16 +116,27 @@ def learning_curve(model):
     plt.grid(True)
     plt.show()
 
-if __name__ == "__main__":
-    results = hyperparameter()
-    best = results[0]
+def create_cm(y_test, predictions):
+    labels = ["building", "car", "fence", "pole", "tree"]
+    cm = confusion_matrix(y_test, predictions, normalize='true')
+    sns.heatmap(cm,
+                annot=True,
+                fmt='.2%',
+                cmap='Blues',
+                xticklabels=labels,
+                yticklabels=labels)
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.title("Confusion Matrix")
+    plt.savefig('confusion_matrix_rf.png', bbox_inches='tight', dpi=300)
+    plt.show()
 
-    learning_curve(
-        lambda fraction, seed: svm_classifier(
-            fraction, seed,
-            kernel=best[0],
-            C=best[1],
-            gamma='scale' if best[2] is None else best[2],
-            degree=3 if best[3] is None else best[3]
-        )
-    )
+
+if __name__ == "__main__":
+    accuracy, predictions, y_test = svm_classifier(fraction_train=0.8)
+    #results = hyperparameter()
+    #best = results[0]
+    # Confusion Matrix
+    create_cm(y_test, predictions)
+    # Learning Curve
+    learning_curve(svm_classifier)

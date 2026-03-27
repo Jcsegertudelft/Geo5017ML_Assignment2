@@ -38,7 +38,7 @@ def forward_search(training_set_df,n_considered, n_wanted):
             feature_set = tuple(selected_features + [feature])
             within = within_scatter(training_set_df, feature_set)
             between = between_scatter(training_set_df, feature_set)
-            J = np.linalg.trace(between) / np.linalg.trace(within)
+            J = np.trace(between) / np.trace(within)
             selection_value.append(J)
         selected_feature = candidate_features.pop(np.argmax(selection_value))
         selected_features.append(selected_feature)
@@ -72,7 +72,7 @@ def between_scatter(df, feature_numbers:Tuple):
         feature_columns = np.array(df_class[feat_column_names].values).T
         mean_diff = np.mean(feature_columns, axis = 1) - total_means
         mean_diff = np.reshape(mean_diff, (1,len(feature_numbers)))
-        scatter_matr += feature_columns.shape[1]/df.shape[0] * np.linalg.matmul(mean_diff.T, mean_diff)
+        scatter_matr += feature_columns.shape[1]/df.shape[0] * np.matmul(mean_diff.T, mean_diff)
     return scatter_matr
 
 
