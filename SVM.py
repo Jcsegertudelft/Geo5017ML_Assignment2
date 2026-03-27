@@ -100,7 +100,7 @@ def learning_curve(model):
         print(f"Training fraction: {training_fraction}")
         accuracies = []
         for seed in seeds:
-            accuracy,_,_ = model(training_fraction, seed)
+            accuracy,_,_ = model(training_fraction, seed, kernel='linear')
             accuracies.append(accuracy)
         avg_accuracy = np.mean(accuracies)
         avg_accuracies.append(avg_accuracy)
@@ -114,6 +114,7 @@ def learning_curve(model):
     plt.ylabel('Accuracy')
     plt.legend()
     plt.grid(True)
+    plt.savefig('learning_curve_SVM.png', dpi = 300, bbox_inches = 'tight')
     plt.show()
 
 def create_cm(y_test, predictions):
@@ -133,10 +134,23 @@ def create_cm(y_test, predictions):
 
 
 if __name__ == "__main__":
-    accuracy, predictions, y_test = svm_classifier(fraction_train=0.8)
-    #results = hyperparameter()
-    #best = results[0]
+    results = hyperparameter()
+    best = results[0]
+
+    pred_total = []
+    y_test_total = []
+    for seed in range(42,45):
+        accuracy, predictions, y_test = svm_classifier(fraction_train=0.8,
+                                                       seed=seed,
+                                                       kernel=best[0],
+                                                       C=best[1],
+                                                       gamma='scale',
+                                                       degree=3)
+        pred_total+=list(predictions)
+        y_test_total+=list(y_test)
+
+
     # Confusion Matrix
-    create_cm(y_test, predictions)
+    create_cm(y_test_total, pred_total)
     # Learning Curve
     learning_curve(svm_classifier)

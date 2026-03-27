@@ -80,10 +80,10 @@ def learning_curve(model):
     # Make plot
     plt.figure(figsize=(10, 6))
     plt.plot(training_fractions, avg_accuracies, marker='o', label='Average Accuracy')
-    plt.title('Learning Curve (using three runs per fraction)')
-    plt.xlabel('Fraction of Training Data')
-    plt.ylabel('Accuracy')
-    plt.legend()
+    plt.title('Learning Curve \n (using three runs per fraction)', fontsize=15)
+    plt.xlabel('Fraction of Training Data', fontsize =13)
+    plt.ylabel('Accuracy', fontsize = 13)
+    plt.legend(fontsize=13)
     plt.grid(True)
     plt.savefig('learning_curve.png', bbox_inches='tight', dpi=300)
     plt.show()
@@ -98,16 +98,23 @@ def create_cm(y_test, predictions):
                 cmap='Blues',
                 xticklabels=labels,
                 yticklabels=labels)
-    plt.xlabel("Predicted")
-    plt.ylabel("True")
+    plt.xlabel("Predicted",fontsize=13)
+    plt.ylabel("True",fontsize=13)
     plt.title("Confusion Matrix")
     plt.savefig('confusion_matrix_rf.png', bbox_inches='tight', dpi=300)
     plt.show()
 
 
 if __name__ == "__main__":
-    accuracy, predictions, y_test = random_forest(0.7)
+    pred_total = []
+    y_test_total = []
+    for seed in range(42,45):
+        accuracy, predictions, y_test = random_forest(0.8, seed)
+        pred_total += list(predictions)
+        y_test_total += list(y_test)
+
+
     # Confusion Matrix
-    create_cm(y_test, predictions)
+    create_cm(y_test_total, pred_total)
     # Learning Curve
     learning_curve(random_forest)
