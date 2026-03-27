@@ -129,7 +129,7 @@ def create_cm(y_test, predictions):
     plt.xlabel("Predicted",fontsize=13)
     plt.ylabel("True",fontsize=13)
     plt.title("Confusion Matrix")
-    plt.savefig('confusion_matrix_rf.png', bbox_inches='tight', dpi=300)
+    plt.savefig('confusion_matrix_svm.png', bbox_inches='tight', dpi=300)
     plt.show()
 
 
