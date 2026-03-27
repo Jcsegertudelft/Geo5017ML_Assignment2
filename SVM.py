@@ -109,9 +109,9 @@ def learning_curve(model):
     # Make plot
     plt.figure(figsize=(10, 6))
     plt.plot(training_fractions, avg_accuracies, marker='o', label='Average Accuracy')
-    plt.title('Learning Curve (using three runs per fraction)')
-    plt.xlabel('Fraction of Training Data')
-    plt.ylabel('Accuracy')
+    plt.title('Learning Curve \n (using three runs per fraction)', fontsize = 14)
+    plt.xlabel('Fraction of Training Data',fontsize=13)
+    plt.ylabel('Accuracy',fontsize=13)
     plt.legend()
     plt.grid(True)
     plt.savefig('learning_curve_SVM.png', dpi = 300, bbox_inches = 'tight')
@@ -126,8 +126,8 @@ def create_cm(y_test, predictions):
                 cmap='Blues',
                 xticklabels=labels,
                 yticklabels=labels)
-    plt.xlabel("Predicted")
-    plt.ylabel("True")
+    plt.xlabel("Predicted",fontsize=13)
+    plt.ylabel("True",fontsize=13)
     plt.title("Confusion Matrix")
     plt.savefig('confusion_matrix_rf.png', bbox_inches='tight', dpi=300)
     plt.show()
