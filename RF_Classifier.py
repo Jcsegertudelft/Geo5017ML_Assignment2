@@ -85,7 +85,7 @@ def learning_curve(model):
     plt.ylabel('Accuracy', fontsize = 13)
     plt.legend(fontsize=13)
     plt.grid(True)
-    plt.savefig('learning_curve.png', bbox_inches='tight', dpi=300)
+    plt.savefig('learning_curve_rf.png', bbox_inches='tight', dpi=300)
     plt.show()
 
 
