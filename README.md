@@ -15,3 +15,5 @@ matplotlib: for plots
 seaborn: used in creation confusion matrix plot
 
 sklearn: for the classifiers and confusion matrix
+
+scipy: for convexhull and KDtree functionality
