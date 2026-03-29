@@ -9,28 +9,230 @@
 \usepackage{booktabs}
 \usepackage{hyperref}
 \usepackage{float}
+\usepackage[margin=2.5cm]{geometry}
 
 \title{\vspace{-2cm} Assignment 2: Pointcloud classification}
-\author{Job Segers, Timber Groeneveld, Akhil Veeranki}
+
+\author{Job Segers (6597084), Timber Groeneveld (4213513), Akhil Veeranki (6305105)}
 \date{\vspace{-0.5cm}}
 
 \begin{document}
 
 \maketitle
 
+\vspace{-1.2cm}
 \section{Introduction}
+Airborne LiDAR data, providing 3D point cloud data with high spatial resolution, has been collected over various countries. To make full use of these datasets, additional information needs to be derived from the individual 3D points. In particular the segmentation and classification of these point clouds would allow for better modeling and monitoring of the environment. Here we take on the task of classifying segmented point clouds into one of 5 classes based solely on the geometry of their composite points, through two different machine learning methods: Support Vector Machines (SVM) and Random Forests (RF). 
+
+\section{Features}
+For the classification we need some features based on the point geometry to classify on. We define six of these possible indicators and then select the four most promising options. The six plan
+\begin{itemize}
+    \setlength\itemsep{0pt}
+    \item 2D point density: Number of points in the data divided by the area of the convex hull of the points projected onto the $XY$-plane.
+    \item Mean planarity: Mean of the planarity of the points, determined from the point itself and its 10 closest neighbours. This is done by calculating the eigenvalues of the covariance matrix of the positions of the point, sorting these eigenvalues and calculating the planarity as: $\frac{\lambda_2 - \lambda_1}{\lambda_3}$ with $\lambda_1 \leq \lambda_2 \leq \lambda_3$.
+    \item Mean linearity: Mean of the linearity of the points, determined from the point itself and its 10 closest neighbours. This is done by calculating the eigenvalues of the covariance matrix of the positions of the point, sorting these eigenvalues and calculating the linearity as: $\frac{\lambda_3 - \lambda_2}{\lambda_3}$ with the $\lambda$ coefficients in ascending order.
+    \item Height above ground: The height difference between the highest point of the object and the z-value of the point with percentile 5, which estimates the ground level while discarding outliers: $z_{max} - z_{5th percentile}$
+    \item 3D point density: The number of points divided by the volume of the 3D convex hull enclosing the point cloud: describes how densely the points occupy the volume of the object. $\frac{N}{V_{\text{convex hull}}}$
+    \item Bounding Box Ratio: This feature measures how tall an object is in comparison to its width, helping to separate elongated vertical structures such as poles from wider objects. Ratio between the vertical extent and the maximum horizontal extent of the object is calculated: $\frac{z_{\max} - z_{\min}}{\max(x_{\max} - x_{\min},\; y_{\max} - y_{\min})}$
+\end{itemize}
+\subsection{Feature selection}
+Prior to the this decision that that seriously influence model design, we created a training and testing split with a set rng-value to ensure repeatability. We select 30\% of each class to be part of the testing split.
+
+For selection of the four most promising features we utilized a forward search approach based on the metric $J$ defined as:
+\[
+J = \frac{\mathrm{trace}(S_B)}{\mathrm{trace}(S_W)}
+\]
+Here $S_B$ and $S_W$ are the between class and within class scatter matrices defined as:
+\begin{align*}
+    S_B=\sum_{k=1}^K\frac{N_k}{N}(\mu_k-\mu)(\mu_k-\mu)^T && S_W=\sum_{k=1}^{K}\frac{N_k}{N}\Sigma_k
+\end{align*}
+with $\Sigma_k$ the class specific covariance matrix of the features of the data samples, $N_k$ being the number of samples in class $k$, $\mu_k$ being the mean feature vector in class $k$ and $N$ and $\mu$ being the total count and mean feature vector. $K$ is the total number of classes.
+
+We start with an empty set of features. We then add calculate the feature that results in the highest value for $J$, were it added to the set and finally repeat this until we have found our desired four features. Based on this we select the mean planarity, mean linearity, height above ground and 3D point density as the four features our models will be based on.
+ 
+\section{Evaluation and analysis}
+\subsection{Hyperparameter Tuning}
+
+% Add results for SVM when finished
+
+Using the four selected features, two classifiers from the Scikit-learn library were implemented in Python, Random Forests (RF) and Support Vector Machine (SVM). For RF the hyperparameters were varied one by one using a 5:5 train/test split. The evaluation metric used is the sklearn accuracy score defined as the fraction of correct predictions over $n_{\text{samples}}$:
+
+\begin{equation}
+\mathrm{accuracy}(y, \hat{y}) = \frac{1}{n_{\text{samples}}} \sum_{i=0}^{n_{\text{samples}} - 1} \mathbf{1}(\hat{y}_i = y_i)
+\end{equation}
+
+with $\hat{y}_i$ the predicted value of the $i$-th sample and $y_i$ the corresponding true value.
+
+The accuracy was calculated 10 times per configuration, with the average accuracy for each configuration shown in \autoref{tab:RF_hyperparameters_results}. When a higher average accuracy was obtained by varying a hyperparameter, this setting was retained. Using this method, the most optimal parameter set was estimated. 
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\hline
+Configuration & Change & Accuracy \\
+\hline
+1 & Baseline & 0.9632 \\
+2 & $n\_estimators=200$ & 0.9652 \\
+3 & $criterion=\text{entropy}$ & \textbf{0.9690} \\
+4 & $max\_depth=25$ & 0.9683 \\
+5 & $max\_depth=10$ & 0.9680 \\
+6 & $max\_depth=5$ & 0.9560 \\
+7 & $min\_samples\_split=5$ & 0.9624 \\
+8 & $min\_samples\_split=10$ & 0.9608 \\
+9 & $min\_samples\_leaf=2$ & 0.9608 \\
+10 & $min\_samples\_leaf=5$ & 0.9520 \\
+11 & $max\_features=3$ & 0.9624 \\
+12 & $max\_features=4$ & 0.9533 \\
+\hline
+\end{tabular}
+\caption{RF hyperparameter tuning results.}
+\label{tab:RF_hyperparameters_results}
+\end{table}
+
+% Add score table for SVM when finished
+
+The estimated optimal configurations of hyperparameters is Configuration 3 with an average accuracy score of 0.969 over all five classes. In \autoref{tab:RF_hyperparameters_overview} the findings for each hyperparameter are explained.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{4cm}|p{7cm}|}
+\hline
+\textbf{Hyperparameter} & \textbf{Description} & \textbf{Findings} \\
+\hline
+\texttt{n\_estimators} & Number of trees in the forest & Increasing from 100 to 200 slightly improved performance, so 200 was used in subsequent tests. \\
+\hline
+\texttt{criterion}  & Measure of node impurity (Gini or Entropy) & Switching to entropy improved average accuracy without noticeable runtime impact. \\
+\hline
+\texttt{max\_depth}  & Maximum depth of each tree & Reducing depth to 25 and 10 had negligible impact; depth of 5 reduced accuracy significantly. Value set to 10 for further tuning. \\
+\hline
+\texttt{min\_samples\_split} & Minimum samples required to split a node & Increasing to 5 or 10 reduced accuracy; default value of 2 was retained. \\
+\hline
+\texttt{min\_samples\_leaf} & Minimum samples required at a leaf node & Increasing above 1 did not improve accuracy; default value was maintained. \\
+\hline
+\texttt{max\_features} & Number of features considered per split & Using \texttt{sqrt} (2 features) performed best; increasing to 3 or 4 reduced accuracy. \\
+\hline
+\end{tabular}
+\caption{Effect of hyperparameters on the RF classification}
+\label{tab:RF_hyperparameters_overview}
+\end{table}
+
+For SVM, the hyperparameters were varied one by one using a 60:40 train/test split. The evaluation metric used is the sklearn accuracy score as defined in Equation (1). The accuracy was calculated once per configuration, with the results for each configuration shown in the table below. When a higher accuracy was obtained by varying a hyperparameter, this setting was kept. Using this method, the most optimal parameter set was estimated.
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\hline
+Configuration & Change & Accuracy \\
+\hline
+1 & linear kernel & 0.9750 \\
+2 & rbf kernel & 0.9600 \\
+3 & poly kernel & 0.9150 \\
+4 & sigmoid kernel & 0.9400 \\
+\hline
+\end{tabular}
+\caption{SVM hyperparameter tuning results.}
+\label{tab:SVM_hyperparameters_results}
+\end{table}
+
+The estimated optimal configuration of hyperparameters is Configuration 3 with an accuracy score of 0.975. The table below explains findings for each hyperparameter.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{4cm}|p{7cm}|}
+\hline
+\textbf{Hyperparameter} & \textbf{Description} & \textbf{Findings} \\
+\hline
+\texttt Kernel & Function defining the decision boundary (linear, RBF, polynomial, sigmoid) & The linear kernel performed best, indicating that the data is largely linearly separable. \\
+\hline
+\texttt C & Parameter controlling margin width and classification error & Increasing C improved accuracy, with the best performance achieved at C = 1.0 \\
+\hline
+\texttt gamma & Kernel coefficient determining the influence of individual samples & The default value (‘scale’) performed well; alternative values did not improve accuracy significantly. \\
+\hline
+\texttt degree & Degree of the polynomial kernel & Changing the degree did not improve performance; polynomial kernels generally underperformed compared to linear and RBF. \\
+\hline
+\end{tabular}
+\caption{Effect of hyperparameters on the SVM classification}
+\label{tab:SVM_hyperparameters_overview}
+\end{table}
+% Add parameter table for SVM when finished
+
+\subsection{Learning Curve}
+A learning curve was carried out to assess the most effective train/test split. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{learning_curve_RF.png}
+    \caption{Learning Curve for the RF classification}
+    \label{fig:Learning_Curve_RF}
+\end{figure}
+
+% Add learning curve for SVM when finished
+
+The learning curve for the RF classifier (figure \ref{fig:Learning_Curve_RF}) shows an initial increase as the training set expands. At a fraction of approximately  0.3 it approaches the maximum accuracy achieved when the RF classifier has enough data to accurately distinguish between the classes, with the accuracy slowly increasing further. At a higher fraction the test set shrinks, causing larger uncertainty in the accuracy score. For the final analysis the highest scoring fraction of 0.8 is used, corresponding with a 8:2 split.
+
+The learning curve for SVM is shown in the figure \ref{fig:Learning_Curve_SVM}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{Learning_Curve_SVM.png}
+    \caption{Learning Curve for the SVM classification}
+    \label{fig:Learning_Curve_SVM}
+\end{figure}
+
+The learning curve for the SVM classifier shows an initial increase as the training set expands until a fraction of 0.6. Beyond this point, the accuracy fluctuates slightly with increasing training fraction. At higher fractions, the test set shrinks, causing larger uncertainty in the accuracy score. This is reflected in the small variations and dips observed between fractions 0.6 and 0.9. The highest accuracy is achieved at a fraction of 0.8, though the test set is quite small here.
+
+
+\subsection{Final Result Analysis}
+In order to assess the score split by class, confusion matrices are created using the final configurations (figures \ref{fig:Confusion Matrix RF}, \ref{fig:Confusion Matrix SVM}). This is again done with three different train/test splits and then averaged, giving a more significant indication of performance of the classifiers than a singular run. 
+\\
+Although cars and fences were perfectly classified, with buildings not far behind, the model scores less on poles, which are frequently misclassified as trees or fences, in return some trees are also classified as poles. The incorrect classifications of the poles and trees can be explained by them sharing features, having a large height and linearity together with low planarity.  
+% Add reasoning for results and errors for SVM when finished
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{confusion_matrix_rf.png}
+    \caption{Confusion Matrix for the RF classification (8:2 split)}
+    \label{fig:Confusion Matrix RF}
+\end{figure}
+
+The confusion matrix for SVM is as follows:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{confusion_matrix_svm.png}
+    \caption{Confusion Matrix for the SVM classification (8:2 split)}
+    \label{fig:Confusion Matrix SVM}
+\end{figure}
+
+Fences and cars are again perfectly classified, with buildings also nearly perfect again. This speaks to the strength of our features in distinguishing these classes. The model scores less on poles, which are sometimes misclassified as tree or fences. Similarity in heights and linearity are again where the reason is likely to be found. 
+
+The trees are all correctly classified by the SVM classifier in contrast to the RF classifier. In general the SVM yields a slightly higher overall, and per class, accuracies. The former is a decent metric for this data set as the population of the classes is very balanced. In case one is more interested in a singular class the class-level recall, accuracy or precision may be can be used. 
+
+% Add confusion matrix for SVM when finished
+% Compare RF with SVM and evaluate
+
+\section{Conclusions}
+The point cloud objects were classified into five categories with the RF and SVM classifiers using four features. Both classifiers performed well with an accuracy of 98\% for the SVM and 96.9\% for the RF on a 8:2 train test split. Hyperparameter tuning resulted in a small increase in accuracy, with the default parameters performing well. For RF, only switching from "gini" to "entropy" and increasing  \texttt{n\_estimators} to 200 were improvements. For SVM, the linear kernel with C=1.0 performed best, indicating the classes are linearly separable. The learning curves showed a clear ascending line over the lower training fractions, which means the small size of the dataset is the bottleneck here. While most classes were very well classified, there was confusion between poles and trees, especially with the RF classifier.
+
+For improvement the pole/tree confusion could be solved by features that distinguish between poles that are narrow throughout and trees with a wide canopy, for example the density ratio of the upper half versus the lower half. By using features that capture multiple statistics per object, it becomes possible to identify these subtle differences between classes. A limiting factor here was the small dataset of 500 objects, that resulted in only 80 samples per class for training using a high train test split. Both better generalization and less variance between runs could be achieved with a larger dataset. 
+
+For more representative results on unseen data a stricter separation between the training and testing set should be maintained, perhaps further splitting the training set to obtain a evaluation set or utilizing k-fold cross evaluation when optimizing the hyperparameters, as they are now partly adjusted for the testing set.
+
+\section{Experiment}
+Github link: \url{https://github.com/Jcsegertudelft/Geo5017ML_Assignment2}
 
 \section{Work distribution}
 \begin{table}[H]
     \centering
     \makebox[0pt]{
     \begin{tabular}{|c|c|c|}
-    Job  & Timber & Akhil  \\
+    Job (35\%)  & Timber (40\%)& Akhil (25\%) \\
     \hline
-    ... & ... & ... \\
+    Setup Python frame, Github, LaTeX & Implement two features & Implemented two features \\
+    Write Introduction & Implement RF classifier  & Implement SVM classifier (4 kernels) \\
+    Implement two features, Forward Search & Write evaluation and analysis (RF) & Analysis and evaluation of SVM \\
+    Editing of report & Write conclusion&  \\
     \end{tabular}}
     \label{tab:placeholder}
 \end{table}
 
+\bibliography{references}
 
 \end{document}
